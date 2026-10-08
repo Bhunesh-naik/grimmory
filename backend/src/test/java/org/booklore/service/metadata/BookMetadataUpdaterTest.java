@@ -1875,4 +1875,109 @@ class BookMetadataUpdaterTest {
             }
         }
     }
+
+    @Nested
+    class DoubanMetadata {
+        private void enableUpdates() {
+            when(appSettingService.getAppSettings()).thenReturn(AppSettings.builder()
+                    .metadataPersistenceSettings(MetadataPersistenceSettings.builder()
+                            .saveToOriginalFile(MetadataPersistenceSettings.SaveToOriginalFile.builder().build())
+                            .build()).build());
+        }
+
+        private BookMetadata incoming() {
+            return BookMetadata.builder().title("Original Title")
+                    .authors(List.of()).categories(Set.of()).moods(Set.of()).tags(Set.of())
+                    .doubanId("12345").doubanRating(8.7).doubanReviewCount(120).build();
+        }
+
+        @Test
+        void savesDoubanOnlyChangesWithoutMockingChangeDetection() {
+            enableUpdates();
+            assertThat(MetadataChangeDetector.hasValueChangesForFileWrite(
+                    incoming(), metadataEntity, new MetadataClearFlags())).isFalse();
+            updater.setBookMetadata(buildContext(incoming(), MetadataReplaceMode.REPLACE_WHEN_PROVIDED));
+
+            assertThat(metadataEntity.getDoubanId()).isEqualTo("12345");
+            assertThat(metadataEntity.getDoubanRating()).isEqualTo(8.7);
+            assertThat(metadataEntity.getDoubanReviewCount()).isEqualTo(120);
+            verify(bookRepository).save(bookEntity);
+            verifyNoInteractions(metadataWriterFactory);
+        }
+
+        @Test
+        void updatesLocksWithoutChangingValues() {
+            enableUpdates();
+            BookMetadata locks = BookMetadata.builder().title("Original Title")
+                    .authors(List.of()).categories(Set.of()).moods(Set.of()).tags(Set.of())
+                    .doubanIdLocked(true).doubanRatingLocked(true).doubanReviewCountLocked(true).build();
+            updater.setBookMetadata(buildContext(locks, MetadataReplaceMode.REPLACE_WHEN_PROVIDED));
+
+            assertThat(metadataEntity.getDoubanIdLocked()).isTrue();
+            assertThat(metadataEntity.getDoubanRatingLocked()).isTrue();
+            assertThat(metadataEntity.getDoubanReviewCountLocked()).isTrue();
+            verify(bookRepository).save(bookEntity);
+        }
+
+        @Test
+        void lockedValuesSurviveReplacementAndExplicitClearing() {
+            enableUpdates();
+            metadataEntity.setDoubanId("existing");
+            metadataEntity.setDoubanRating(7.5);
+            metadataEntity.setDoubanReviewCount(50);
+            metadataEntity.setDoubanIdLocked(true);
+            metadataEntity.setDoubanRatingLocked(true);
+            metadataEntity.setDoubanReviewCountLocked(true);
+            MetadataClearFlags clear = new MetadataClearFlags();
+            clear.setDoubanId(true);
+            clear.setDoubanRating(true);
+            clear.setDoubanReviewCount(true);
+            BookMetadata incoming = incoming();
+            incoming.setTitle("Updated title");
+            MetadataUpdateContext context = buildContext(incoming, MetadataReplaceMode.REPLACE_ALL);
+            context.getMetadataUpdateWrapper().setClearFlags(clear);
+
+            updater.setBookMetadata(context);
+
+            assertThat(metadataEntity.getTitle()).isEqualTo("Updated title");
+            assertThat(metadataEntity.getDoubanId()).isEqualTo("existing");
+            assertThat(metadataEntity.getDoubanRating()).isEqualTo(7.5);
+            assertThat(metadataEntity.getDoubanReviewCount()).isEqualTo(50);
+        }
+
+        @Test
+        void clearsUnlockedDoubanValues() {
+            enableUpdates();
+            metadataEntity.setDoubanId("existing");
+            metadataEntity.setDoubanRating(7.5);
+            metadataEntity.setDoubanReviewCount(50);
+            MetadataClearFlags clear = new MetadataClearFlags();
+            clear.setDoubanId(true);
+            clear.setDoubanRating(true);
+            clear.setDoubanReviewCount(true);
+            MetadataUpdateContext context = buildContext(incoming(), MetadataReplaceMode.REPLACE_WHEN_PROVIDED);
+            context.getMetadataUpdateWrapper().setClearFlags(clear);
+
+            updater.setBookMetadata(context);
+
+            assertThat(metadataEntity.getDoubanId()).isNull();
+            assertThat(metadataEntity.getDoubanRating()).isNull();
+            assertThat(metadataEntity.getDoubanReviewCount()).isNull();
+            verify(bookRepository).save(bookEntity);
+        }
+
+        @Test
+        void replaceMissingPreservesExistingValuesAndFillsMissingOnes() {
+            enableUpdates();
+            metadataEntity.setDoubanId("existing");
+            metadataEntity.setDoubanRating(7.5);
+
+            updater.setBookMetadata(buildContext(incoming(), MetadataReplaceMode.REPLACE_MISSING));
+
+            assertThat(metadataEntity.getDoubanId()).isEqualTo("existing");
+            assertThat(metadataEntity.getDoubanRating()).isEqualTo(7.5);
+            assertThat(metadataEntity.getDoubanReviewCount()).isEqualTo(120);
+        }
+    }
+
 }

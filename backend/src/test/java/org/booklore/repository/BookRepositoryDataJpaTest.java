@@ -121,7 +121,7 @@ class BookRepositoryDataJpaTest {
 
         entityManager.clear();
 
-        Optional<BookEntity> result = bookRepository.findByIdForKoboDownload(1L);
+        Optional<BookEntity> result = bookRepository.findByIdForKoboDownload(book.getId());
 
         TestTransaction.end();
 
@@ -130,5 +130,31 @@ class BookRepositoryDataJpaTest {
         BookEntity bookEntity = result.get();
         assertThat(bookEntity.getId()).isEqualTo(book.getId());
         assertThat(bookEntity.getPrimaryBookFile()).isNotNull();
+    }
+
+    @Test
+    void doubanMetadataSurvivesPersistenceAndReload() {
+        LibraryEntity library = LibraryEntity.builder().name("Douban test library")
+                .icon("book").watch(false).build();
+        entityManager.persist(library);
+        BookEntity book = BookEntity.builder().library(library).isPhysical(true)
+                .addedOn(Instant.now()).build();
+        entityManager.persist(book);
+        entityManager.flush();
+        BookMetadataEntity metadata = BookMetadataEntity.builder().bookId(book.getId()).book(book)
+                .title("Douban test book").doubanId("12345").doubanRating(8.7).doubanReviewCount(120)
+                .doubanIdLocked(true).doubanRatingLocked(false).doubanReviewCountLocked(true).build();
+        entityManager.persist(metadata);
+        entityManager.flush();
+        entityManager.clear();
+
+        BookMetadataEntity reloaded = entityManager.find(BookMetadataEntity.class, book.getId());
+
+        assertThat(reloaded.getDoubanId()).isEqualTo("12345");
+        assertThat(reloaded.getDoubanRating()).isEqualTo(8.7);
+        assertThat(reloaded.getDoubanReviewCount()).isEqualTo(120);
+        assertThat(reloaded.getDoubanIdLocked()).isTrue();
+        assertThat(reloaded.getDoubanRatingLocked()).isFalse();
+        assertThat(reloaded.getDoubanReviewCountLocked()).isTrue();
     }
 }

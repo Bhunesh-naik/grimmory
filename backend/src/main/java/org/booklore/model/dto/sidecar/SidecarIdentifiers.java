@@ -21,6 +21,7 @@ public class SidecarIdentifiers {
     private String lubimyczytacId;
     private String ranobedbId;
     private String audibleId;
+    private String doubanId;
     private String applebooksId;
     private String openlibraryId;
 }

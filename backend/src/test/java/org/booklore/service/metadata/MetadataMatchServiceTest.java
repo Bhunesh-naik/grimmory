@@ -399,4 +399,16 @@ class MetadataMatchServiceTest {
             verify(bookQueryService).saveAll(List.of(book1, book2));
         }
     }
+
+    @Test
+    void doubanValuesContributeTheirConfiguredWeights() {
+        stubWeights(defaultWeights);
+        BookMetadataEntity metadata = BookMetadataEntity.builder()
+                .doubanRating(8.7).doubanReviewCount(120).build();
+        float expected = 100f * (defaultWeights.getDoubanRating() + defaultWeights.getDoubanReviewCount())
+                / defaultWeights.totalWeight();
+
+        assertThat(service.calculateMatchScore(bookWith(metadata))).isCloseTo(expected, within(0.001f));
+    }
+
 }

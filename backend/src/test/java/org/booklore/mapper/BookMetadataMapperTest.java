@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -62,5 +63,23 @@ public class BookMetadataMapperTest {
         assertEquals(4.5, dto.getHardcoverRating());
         assertEquals("gr-id", dto.getGoodreadsId());
     }
+
+    @Test
+    void mapsPersistedDoubanValuesAndLocksForBothApiShapes() {
+        BookMetadataEntity entity = BookMetadataEntity.builder()
+                .doubanId("12345").doubanRating(8.7).doubanReviewCount(120)
+                .doubanIdLocked(true).doubanRatingLocked(true).doubanReviewCountLocked(true).build();
+
+        for (BookMetadata dto : List.of(bookMetadataMapper.toBookMetadata(entity),
+                bookMetadataMapper.toBookMetadataWithoutRelations(entity, false))) {
+            assertEquals("12345", dto.getDoubanId());
+            assertEquals(8.7, dto.getDoubanRating());
+            assertEquals(120, dto.getDoubanReviewCount());
+            assertEquals(true, dto.getDoubanIdLocked());
+            assertEquals(true, dto.getDoubanRatingLocked());
+            assertEquals(true, dto.getDoubanReviewCountLocked());
+        }
+    }
+
 }
 

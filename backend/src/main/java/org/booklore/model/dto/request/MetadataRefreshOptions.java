@@ -72,6 +72,9 @@ public class MetadataRefreshOptions {
         private FieldProvider ranobedbRating;
         private FieldProvider audibleId;
         private FieldProvider audibleRating;
+        private FieldProvider doubanId;
+        private FieldProvider doubanRating;
+        private FieldProvider doubanReviewCount;
         private FieldProvider applebooksId;
         private FieldProvider applebooksRating;
         private FieldProvider applebooksReviewCount;
@@ -170,6 +173,12 @@ public class MetadataRefreshOptions {
         @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
         private boolean audibleRating = true;
         @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
+        private boolean doubanId = true;
+        @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
+        private boolean doubanRating = true;
+        @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
+        private boolean doubanReviewCount = true;
+        @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
         private boolean applebooksId = true;
         @Builder.Default @JsonSetter(nulls = Nulls.SKIP)
         private boolean applebooksRating = true;
@@ -222,6 +231,9 @@ public class MetadataRefreshOptions {
             this.audibleId = true;
             this.audibleRating = true;
             this.audibleReviewCount = true;
+            this.doubanId = true;
+            this.doubanRating = true;
+            this.doubanReviewCount = true;
             this.applebooksId = true;
             this.applebooksRating = true;
             this.applebooksReviewCount = true;

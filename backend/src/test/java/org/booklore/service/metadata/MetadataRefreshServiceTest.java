@@ -1198,4 +1198,43 @@ class MetadataRefreshServiceTest {
             assertThat(result).isEmpty();
         }
     }
+
+    @Test
+    void buildFetchMetadata_includesDoubanValuesAndPreservesLocks() {
+        BookMetadata existing = BookMetadata.builder().doubanIdLocked(true)
+                .doubanRatingLocked(false).doubanReviewCountLocked(true).build();
+        BookMetadata fetched = BookMetadata.builder().doubanId("12345")
+                .doubanRating(8.7).doubanReviewCount(120).build();
+        MetadataRefreshOptions options = MetadataRefreshOptions.builder()
+                .enabledFields(new MetadataRefreshOptions.EnabledFields()).build();
+
+        BookMetadata result = service.buildFetchMetadata(existing, 1L, options,
+                Map.of(MetadataProvider.Douban, fetched));
+
+        assertThat(result.getDoubanId()).isEqualTo("12345");
+        assertThat(result.getDoubanRating()).isEqualTo(8.7);
+        assertThat(result.getDoubanReviewCount()).isEqualTo(120);
+        assertThat(result.getDoubanIdLocked()).isTrue();
+        assertThat(result.getDoubanRatingLocked()).isFalse();
+        assertThat(result.getDoubanReviewCountLocked()).isTrue();
+    }
+
+    @Test
+    void buildFetchMetadata_preservesDisabledDoubanFieldsInReplaceAll() {
+        BookMetadata existing = BookMetadata.builder().doubanId("existing")
+                .doubanRating(7.5).doubanReviewCount(50).build();
+        MetadataRefreshOptions options = MetadataRefreshOptions.builder()
+                .enabledFields(MetadataRefreshOptions.EnabledFields.builder()
+                        .doubanId(false).doubanRating(false).doubanReviewCount(false).build())
+                .replaceMode(MetadataReplaceMode.REPLACE_ALL).build();
+
+        BookMetadata result = service.buildFetchMetadata(existing, 1L, options,
+                Map.of(MetadataProvider.Douban, BookMetadata.builder().doubanId("other")
+                        .doubanRating(8.7).doubanReviewCount(120).build()));
+
+        assertThat(result.getDoubanId()).isEqualTo("existing");
+        assertThat(result.getDoubanRating()).isEqualTo(7.5);
+        assertThat(result.getDoubanReviewCount()).isEqualTo(50);
+    }
+
 }

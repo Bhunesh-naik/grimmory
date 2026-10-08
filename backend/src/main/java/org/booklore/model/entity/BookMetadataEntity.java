@@ -138,6 +138,15 @@ public class BookMetadataEntity {
     @Column(name = "audible_review_count")
     private Integer audibleReviewCount;
 
+    @Column(name = "douban_id", length = 100)
+    private String doubanId;
+
+    @Column(name = "douban_rating")
+    private Double doubanRating;
+
+    @Column(name = "douban_review_count")
+    private Integer doubanReviewCount;
+
     @Column(name = "applebooks_id", length = 100)
     private String applebooksId;
 
@@ -299,6 +308,18 @@ public class BookMetadataEntity {
     @Builder.Default
     private Boolean audibleReviewCountLocked = Boolean.FALSE;
 
+    @Column(name = "douban_id_locked")
+    @Builder.Default
+    private Boolean doubanIdLocked = Boolean.FALSE;
+
+    @Column(name = "douban_rating_locked")
+    @Builder.Default
+    private Boolean doubanRatingLocked = Boolean.FALSE;
+
+    @Column(name = "douban_review_count_locked")
+    @Builder.Default
+    private Boolean doubanReviewCountLocked = Boolean.FALSE;
+
     @Column(name = "applebooks_id_locked")
     @Builder.Default
     private Boolean applebooksIdLocked = Boolean.FALSE;
@@ -381,6 +402,7 @@ public class BookMetadataEntity {
         this.lubimyczytacId = trimOrNull(this.lubimyczytacId);
         this.ranobedbId = trimOrNull(this.ranobedbId);
         this.audibleId = trimOrNull(this.audibleId);
+        this.doubanId = trimOrNull(this.doubanId);
         this.applebooksId = trimOrNull(this.applebooksId);
         this.contentRating = trimOrNull(this.contentRating);
         this.narrator = trimOrNull(this.narrator);
@@ -486,6 +508,9 @@ public class BookMetadataEntity {
         this.audibleIdLocked = lock;
         this.audibleRatingLocked = lock;
         this.audibleReviewCountLocked = lock;
+        this.doubanIdLocked = lock;
+        this.doubanRatingLocked = lock;
+        this.doubanReviewCountLocked = lock;
         this.applebooksIdLocked = lock;
         this.applebooksRatingLocked = lock;
         this.applebooksReviewCountLocked = lock;
@@ -538,6 +563,9 @@ public class BookMetadataEntity {
                 && Boolean.TRUE.equals(this.audibleIdLocked)
                 && Boolean.TRUE.equals(this.audibleRatingLocked)
                 && Boolean.TRUE.equals(this.audibleReviewCountLocked)
+                && Boolean.TRUE.equals(this.doubanIdLocked)
+                && Boolean.TRUE.equals(this.doubanRatingLocked)
+                && Boolean.TRUE.equals(this.doubanReviewCountLocked)
                 && Boolean.TRUE.equals(this.applebooksIdLocked)
                 && Boolean.TRUE.equals(this.applebooksRatingLocked)
                 && Boolean.TRUE.equals(this.applebooksReviewCountLocked)

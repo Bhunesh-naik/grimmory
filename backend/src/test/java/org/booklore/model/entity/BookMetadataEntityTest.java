@@ -183,4 +183,30 @@ class BookMetadataEntityTest {
         assertTrue(storedSearchText.contains(searchQuery4), 
             "Search 'Jo Nesbø' should match stored text: " + storedSearchText);
     }
+
+    @Test
+    void doubanFieldsParticipateInGlobalLocks() {
+        BookMetadataEntity entity = new BookMetadataEntity();
+        entity.applyLockToAllFields(true);
+        assertTrue(entity.getDoubanIdLocked());
+        assertTrue(entity.getDoubanRatingLocked());
+        assertTrue(entity.getDoubanReviewCountLocked());
+        assertTrue(entity.areAllFieldsLocked());
+        entity.setDoubanRatingLocked(false);
+        assertFalse(entity.areAllFieldsLocked());
+        entity.applyLockToAllFields(false);
+        assertFalse(entity.getDoubanIdLocked());
+        assertFalse(entity.getDoubanReviewCountLocked());
+    }
+
+    @Test
+    void trimsDoubanIdentifierBeforePersistence() {
+        BookMetadataEntity entity = BookMetadataEntity.builder().title("Book").doubanId(" 12345 ").build();
+        entity.updateSearchText();
+        assertEquals("12345", entity.getDoubanId());
+        entity.setDoubanId("   ");
+        entity.updateSearchText();
+        assertNull(entity.getDoubanId());
+    }
+
 }

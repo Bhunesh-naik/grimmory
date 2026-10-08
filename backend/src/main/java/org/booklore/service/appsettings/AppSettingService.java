@@ -463,6 +463,9 @@ public class AppSettingService {
                 .audibleId(nullProvider)
                 .audibleRating(nullProvider)
                 .audibleReviewCount(nullProvider)
+                .doubanId(nullProvider)
+                .doubanRating(nullProvider)
+                .doubanReviewCount(nullProvider)
                 .applebooksId(nullProvider)
                 .applebooksRating(nullProvider)
                 .applebooksReviewCount(nullProvider)
@@ -506,6 +509,9 @@ public class AppSettingService {
                 .audibleId(true)
                 .audibleRating(true)
                 .audibleReviewCount(true)
+                .doubanId(true)
+                .doubanRating(true)
+                .doubanReviewCount(true)
                 .applebooksId(true)
                 .applebooksRating(true)
                 .applebooksReviewCount(true)
@@ -659,6 +665,9 @@ public class AppSettingService {
         fields.setAudibleId(true);
         fields.setAudibleRating(true);
         fields.setAudibleReviewCount(true);
+        fields.setDoubanId(true);
+        fields.setDoubanRating(true);
+        fields.setDoubanReviewCount(true);
         fields.setApplebooksId(true);
         fields.setApplebooksRating(true);
         fields.setApplebooksReviewCount(true);
